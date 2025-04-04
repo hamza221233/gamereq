@@ -1,0 +1,3938 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محلل متطلبات الألعاب المتقدم</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --accent: #fd79a8;
+            --success: #00b894;
+            --warning: #fdcb6e;
+            --danger: #d63031;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--dark), #34495e);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeIn 1s ease;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-container {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        #search {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-size: 1.1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        #search:focus {
+            outline: none;
+            box-shadow: 0 5px 20px rgba(109, 89, 231, 0.4);
+            transform: scale(1.02);
+        }
+
+        .search-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(45, 52, 54, 0.95);
+            border-radius: 0 0 15px 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 50;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .search-suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-item:hover {
+            background-color: rgba(108, 92, 231, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .filter-menu-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .filter-menu-btn:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(253, 121, 168, 0.3);
+        }
+
+        .filter-menu {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100vh;
+            background: rgba(45, 52, 54, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            z-index: 100;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+        }
+
+        .filter-menu.active {
+            right: 0;
+        }
+
+        .filter-menu h2 {
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .filter-group {
+            margin-bottom: 2rem;
+        }
+
+        .filter-group h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .filter-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+
+        .filter-option {
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .filter-option:hover, .filter-option.active {
+            background: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .filter-option.multi-select {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-option.multi-select input {
+            margin-right: 0.5rem;
+        }
+
+        .close-filter-menu {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .close-filter-menu:hover {
+            transform: rotate(90deg);
+        }
+
+        .games-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            animation: fadeIn 0.8s ease;
+            cursor: pointer;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: cardEntrance 0.5s ease forwards;
+        }
+
+        @keyframes cardEntrance {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border-color: rgba(108, 92, 231, 0.5);
+        }
+
+        .game-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 1px solid var(--card-border);
+            transition: transform 0.3s ease;
+        }
+
+        .game-card:hover .game-image {
+            transform: scale(1.05);
+        }
+
+        .game-content {
+            padding: 1.5rem;
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            transition: color 0.3s ease;
+        }
+
+        .game-card:hover .game-title {
+            color: var(--accent);
+        }
+
+        .game-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .compatibility-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            z-index: 10;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* شاشة تفاصيل اللعبة */
+        .game-details {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 2rem;
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
+        }
+
+        .game-details.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .game-details-content {
+            background: rgba(45, 52, 54, 0.95);
+            border-radius: 15px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(108, 92, 231, 0.3);
+        }
+
+        .game-details.active .game-details-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .close-details {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .close-details:hover {
+            color: var(--accent);
+            transform: rotate(90deg);
+        }
+
+        .requirements-section {
+            margin-top: 2rem;
+            animation: fadeIn 0.5s ease 0.2s forwards;
+            opacity: 0;
+        }
+
+        .requirements-title {
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            animation: fadeIn 0.5s ease 0.3s forwards;
+            opacity: 0;
+        }
+
+        @media (max-width: 768px) {
+            .requirements-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .requirement-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .requirement-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .requirement-card.minimum {
+            border-left: 4px solid var(--warning);
+        }
+
+        .requirement-card.recommended {
+            border-left: 4px solid var(--success);
+        }
+
+        .requirement-item {
+            margin-bottom: 0.8rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .requirement-label {
+            font-weight: bold;
+            color: var(--secondary);
+        }
+
+        /* قسم تحليل النظام */
+        .system-check {
+            margin-top: 3rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            animation: fadeIn 0.5s ease 0.4s forwards;
+            opacity: 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .system-check h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.3);
+        }
+
+        .hardware-suggestions {
+            position: relative;
+        }
+
+        .hardware-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(45, 52, 54, 0.95);
+            border-radius: 0 0 5px 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+            animation: slideDown 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-top: none;
+        }
+
+        .hardware-dropdown.active {
+            display: block;
+        }
+
+        .hardware-option {
+            padding: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .hardware-option:hover {
+            background-color: rgba(108, 92, 231, 0.3);
+            padding-right: 1rem;
+        }
+
+        .check-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .check-btn:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(253, 121, 168, 0.3);
+        }
+
+        .check-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* نتائج التحليل */
+        .compatibility-results {
+            margin-top: 3rem;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .compatibility-results.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .compatibility-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .compatibility-item:hover {
+            transform: translateX(5px);
+        }
+
+        .compatible {
+            border-left-color: var(--success);
+        }
+
+        .not-compatible {
+            border-left-color: var(--danger);
+        }
+
+        .partially-compatible {
+            border-left-color: var(--warning);
+        }
+
+        .compatibility-icon {
+            margin-left: 1rem;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .compatible .compatibility-icon {
+            color: var(--success);
+        }
+
+        .not-compatible .compatibility-icon {
+            color: var(--danger);
+        }
+
+        .partially-compatible .compatibility-icon {
+            color: var(--warning);
+        }
+
+        .loading-skeleton {
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .skeleton-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-image {
+            width: 100%;
+            height: 200px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .skeleton-content {
+            padding: 1.5rem;
+        }
+
+        .skeleton-line {
+            height: 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .skeleton-line.short {
+            width: 50%;
+        }
+
+        .skeleton-line.medium {
+            width: 70%;
+        }
+
+        .skeleton-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255,255,255,0.05), 
+                transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { 
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .games-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .filter-menu {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .game-details-content {
+                padding: 1.5rem;
+            }
+            
+            .filter-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .progress-bar {
+            height: 5px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            margin-top: 1rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            width: 0;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>محلل متطلبات الألعاب المتقدم</h1>
+            <p>اكتشف ما إذا كان جهازك قادرًا على تشغيل الألعاب المفضلة لديك</p>
+        </header>
+
+        <div class="controls">
+            <div class="search-container">
+                <input type="text" id="search" placeholder="ابحث عن لعبة أو قطعة جهاز...">
+                <div class="search-suggestions" id="search-suggestions"></div>
+            </div>
+            <button class="filter-menu-btn" id="filter-menu-btn">
+                <span>تصفية الألعاب</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="21" x2="4" y2="14"></line>
+                    <line x1="4" y1="10" x2="4" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12" y2="3"></line>
+                    <line x1="20" y1="21" x2="20" y2="16"></line>
+                    <line x1="20" y1="12" x2="20" y2="3"></line>
+                    <line x1="1" y1="14" x2="7" y2="14"></line>
+                    <line x1="9" y1="8" x2="15" y2="8"></line>
+                    <line x1="17" y1="16" x2="23" y2="16"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="filter-menu" id="filter-menu">
+            <button class="close-filter-menu" id="close-filter-menu">×</button>
+            <h2>تصفية الألعاب</h2>
+            
+            <div class="filter-group">
+                <h3>نوع اللعبة</h3>
+                <div class="filter-options">
+                    <div class="filter-option active" data-filter="type" data-value="all">الكل</div>
+                    <div class="filter-option" data-filter="type" data-value="action">أكشن</div>
+                    <div class="filter-option" data-filter="type" data-value="adventure">مغامرات</div>
+                    <div class="filter-option" data-filter="type" data-value="strategy">إستراتيجية</div>
+                    <div class="filter-option" data-filter="type" data-value="rpg">ألعاب أدوار</div>
+                    <div class="filter-option" data-filter="type" data-value="sports">رياضية</div>
+                    <div class="filter-option" data-filter="type" data-value="fps">أول شخص</div>
+                    <div class="filter-option" data-filter="type" data-value="racing">سباقات</div>
+                    <div class="filter-option" data-filter="type" data-value="simulation">محاكاة</div>
+                    <div class="filter-option" data-filter="type" data-value="mmo">ألعاب جماعية</div>
+                    <div class="filter-option" data-filter="type" data-value="horror">رعب</div>
+                    <div class="filter-option" data-filter="type" data-value="puzzle">ألغاز</div>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <h3>مستوى المتطلبات</h3>
+                <div class="filter-options">
+                    <div class="filter-option active" data-filter="level" data-value="all">الكل</div>
+                    <div class="filter-option" data-filter="level" data-value="low">منخفضة</div>
+                    <div class="filter-option" data-filter="level" data-value="medium">متوسطة</div>
+                    <div class="filter-option" data-filter="level" data-value="high">عالية</div>
+                    <div class="filter-option" data-filter="level" data-value="very-high">عالية جداً</div>
+                </div>
+            </div>
+            
+            <div class="filter-group">
+                <h3>متوافق مع جهازي</h3>
+                <div class="filter-options">
+                    <div class="filter-option multi-select" data-filter="compatible" data-value="all">
+                        <input type="checkbox" id="filter-compatible" checked>
+                        <label for="filter-compatible">عرض الكل</label>
+                    </div>
+                    <div class="filter-option multi-select" data-filter="compatible" data-value="full">
+                        <input type="checkbox" id="filter-full-compatible">
+                        <label for="filter-full-compatible">متوافق بالكامل</label>
+                    </div>
+                    <div class="filter-option multi-select" data-filter="compatible" data-value="partial">
+                        <input type="checkbox" id="filter-partial-compatible">
+                        <label for="filter-partial-compatible">متوافق جزئياً</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading-skeleton" id="loading-skeleton">
+            <div class="skeleton-card">
+                <div class="skeleton-image"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-image"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-image"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div class="games-container" id="games-container">
+            <!-- سيتم إضافة الألعاب هنا عبر JavaScript -->
+        </div>
+    </div>
+
+    <!-- شاشة تفاصيل اللعبة -->
+    <div class="game-details" id="game-details">
+        <div class="game-details-content">
+            <button class="close-details" id="close-details">×</button>
+            <img id="detail-game-image" class="game-image" src="" alt="">
+            <h2 id="detail-game-title" class="game-title"></h2>
+            
+            <div class="requirements-section">
+                <h3 class="requirements-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    متطلبات التشغيل
+                </h3>
+                
+                <div class="requirements-grid">
+                    <div class="requirement-card minimum">
+                        <h4>الحد الأدنى</h4>
+                        <div class="requirement-item">
+                            <span class="requirement-label">المعالج:</span>
+                            <span id="min-cpu"></span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-label">كرت الشاشة:</span>
+                            <span id="min-gpu"></span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-label">الذاكرة:</span>
+                            <span id="min-ram"></span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-label">التخزين:</span>
+                            <span id="min-storage"></span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-label">نظام التشغيل:</span>
+                            <span id="min-os"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="requirement-card recommended">
+                        <h4>الموصى به</h4>
+                        <div class="requirement-item">
+                            <span class="requirement-label">المعالج:</span>
+                            <span id="rec-cpu"></span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-label">كرت الشاشة:</span>
+                            <span id="rec-gpu"></span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-label">الذاكرة:</span>
+                            <span id="rec-ram"></span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-label">التخزين:</span>
+                            <span id="rec-storage"></span>
+                        </div>
+                        <div class="requirement-item">
+                            <span class="requirement-label">نظام التشغيل:</span>
+                            <span id="rec-os"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="system-check">
+                <h3>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    هل جهازي قادر على تشغيل هذه اللعبة؟
+                </h3>
+                
+                <div class="form-group hardware-suggestions">
+                    <label for="user-cpu">المعالج:</label>
+                    <input type="text" id="user-cpu" placeholder="مثال: Intel Core i5-8400">
+                    <div class="hardware-dropdown" id="cpu-suggestions"></div>
+                </div>
+                
+                <div class="form-group hardware-suggestions">
+                    <label for="user-gpu">كرت الشاشة:</label>
+                    <input type="text" id="user-gpu" placeholder="مثال: NVIDIA GTX 1060">
+                    <div class="hardware-dropdown" id="gpu-suggestions"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-ram">الذاكرة العشوائية (RAM):</label>
+                    <select id="user-ram">
+                        <option value="4">4GB</option>
+                        <option value="8" selected>8GB</option>
+                        <option value="16">16GB</option>
+                        <option value="32">32GB أو أكثر</option>
+                    </select>
+                </div>
+                
+                <button class="check-btn" id="check-btn">
+                    <span>تحقق من التوافق</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="compatibility-results" id="compatibility-results">
+                <h3>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    نتائج التحليل
+                </h3>
+                <!-- سيتم ملؤها ديناميكياً -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات الألعاب (تمت إضافة المزيد من الألعاب)
+        const games = [
+            {
+                id: 1,
+                title: "Cyberpunk 2077",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1091500/header.jpg",
+                type: "action",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-3570K أو AMD FX-8310",
+                        gpu: "NVIDIA GTX 780 3GB أو AMD Radeon RX 470",
+                        ram: "8GB",
+                        storage: "70GB HDD",
+                        os: "Windows 7/10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-4790 أو AMD Ryzen 3 3200G",
+                        gpu: "NVIDIA GTX 1060 6GB أو AMD Radeon R9 Fury",
+                        ram: "12GB",
+                        storage: "70GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 2,
+                title: "Red Dead Redemption 2",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1174180/header.jpg",
+                type: "adventure",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-2500K أو AMD FX-6300",
+                        gpu: "NVIDIA GTX 770 2GB أو AMD Radeon R9 280",
+                        ram: "8GB",
+                        storage: "150GB HDD",
+                        os: "Windows 7/10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-4770K أو AMD Ryzen 5 1500X",
+                        gpu: "NVIDIA GTX 1060 6GB أو AMD RX 480 4GB",
+                        ram: "12GB",
+                        storage: "150GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 3,
+                title: "The Witcher 3: Wild Hunt",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/292030/header.jpg",
+                type: "rpg",
+                level: "medium",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-2500K أو AMD Phenom II X4 940",
+                        gpu: "NVIDIA GTX 660 أو AMD Radeon HD 7870",
+                        ram: "6GB",
+                        storage: "35GB HDD",
+                        os: "Windows 7/8/10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-3770 أو AMD FX-8350",
+                        gpu: "NVIDIA GTX 770 أو AMD R9 290",
+                        ram: "8GB",
+                        storage: "35GB SSD",
+                        os: "Windows 7/8/10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 4,
+                title: "Elden Ring",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1245620/header.jpg",
+                type: "rpg",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-8400 أو AMD Ryzen 3 3300X",
+                        gpu: "NVIDIA GTX 1060 3GB أو AMD RX 580 4GB",
+                        ram: "12GB",
+                        storage: "60GB HDD",
+                        os: "Windows 10/11 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-8700K أو AMD Ryzen 5 3600X",
+                        gpu: "NVIDIA GTX 1070 8GB أو AMD RX Vega 56 8GB",
+                        ram: "16GB",
+                        storage: "60GB SSD",
+                        os: "Windows 10/11 64-bit"
+                    }
+                }
+            },
+            {
+                id: 5,
+                title: "Grand Theft Auto V",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/271590/header.jpg",
+                type: "action",
+                level: "medium",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core 2 Quad Q6600 أو AMD Phenom 9850",
+                        gpu: "NVIDIA 9800 GT 1GB أو AMD HD 4870 1GB",
+                        ram: "4GB",
+                        storage: "72GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i5-3470 أو AMD FX-8350",
+                        gpu: "NVIDIA GTX 660 2GB أو AMD HD 7870 2GB",
+                        ram: "8GB",
+                        storage: "72GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 6,
+                title: "Call of Duty: Warzone",
+                image: "https://bnetcmsus-a.akamaihd.net/cms/gallery/N2KT6ZURN6Z31668019382296.jpg",
+                type: "fps",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i3-4340 أو AMD FX-6300",
+                        gpu: "NVIDIA GTX 670 / GTX 1650 أو AMD Radeon HD 7950",
+                        ram: "8GB",
+                        storage: "175GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i5-2500K أو AMD Ryzen R5 1600X",
+                        gpu: "NVIDIA GTX 970 / GTX 1660 أو AMD R9 390 / RX 580",
+                        ram: "12GB",
+                        storage: "175GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 7,
+                title: "Forza Horizon 5",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1551360/header.jpg",
+                type: "racing",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel i3-4170 أو AMD Ryzen 3 1200",
+                        gpu: "NVIDIA GTX 650 Ti أو AMD RX 460",
+                        ram: "8GB",
+                        storage: "110GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel i5-8400 أو AMD Ryzen 5 1500X",
+                        gpu: "NVIDIA GTX 1070 أو AMD RX 590",
+                        ram: "16GB",
+                        storage: "110GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 8,
+                title: "FIFA 23",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1811260/header.jpg",
+                type: "sports",
+                level: "medium",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-6600K أو AMD Ryzen 5 1600",
+                        gpu: "NVIDIA GTX 1050 Ti أو AMD RX 570",
+                        ram: "8GB",
+                        storage: "100GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-6700 أو AMD Ryzen 7 2700X",
+                        gpu: "NVIDIA GTX 1660 أو AMD RX 5600 XT",
+                        ram: "12GB",
+                        storage: "100GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 9,
+                title: "Assassin's Creed Valhalla",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/2208920/header.jpg",
+                type: "action",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "AMD Ryzen 3 1200 أو Intel i5-4460",
+                        gpu: "AMD R9 380 أو NVIDIA GTX 960",
+                        ram: "8GB",
+                        storage: "160GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "AMD Ryzen 5 1600 أو Intel i7-4790",
+                        gpu: "AMD RX 570 أو NVIDIA GTX 1060",
+                        ram: "12GB",
+                        storage: "160GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 10,
+                title: "Counter-Strike 2",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/730/header.jpg",
+                type: "fps",
+                level: "medium",
+                requirements: {
+                    minimum: {
+                        cpu: "4 أنوية - Intel Core i5 750 أو أعلى",
+                        gpu: "NVIDIA GTX 970 أو AMD RX 570",
+                        ram: "8GB",
+                        storage: "85GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-9700K أو AMD Ryzen 7 3700X",
+                        gpu: "NVIDIA RTX 2070 أو AMD RX 5700 XT",
+                        ram: "16GB",
+                        storage: "85GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 11,
+                title: "Dota 2",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/570/header.jpg",
+                type: "strategy",
+                level: "low",
+                requirements: {
+                    minimum: {
+                        cpu: "Dual-core من Intel أو AMD بسرعة 2.8GHz",
+                        gpu: "NVIDIA GeForce 8600/9600GT أو AMD Radeon HD 2600/3600",
+                        ram: "4GB",
+                        storage: "15GB HDD",
+                        os: "Windows 7/8/10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i5 أو AMD Phenom II X3",
+                        gpu: "NVIDIA GeForce GTX 650 أو AMD Radeon HD 7750",
+                        ram: "8GB",
+                        storage: "15GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 12,
+                title: "Apex Legends",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1172470/header.jpg",
+                type: "fps",
+                level: "medium",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i3-6300 أو AMD FX-4350",
+                        gpu: "NVIDIA GT 640 أو AMD Radeon HD 7730",
+                        ram: "6GB",
+                        storage: "56GB HDD",
+                        os: "Windows 7/10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i5-3570K أو AMD Ryzen 5",
+                        gpu: "NVIDIA GTX 970 أو AMD R9 290",
+                        ram: "8GB",
+                        storage: "56GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 13,
+                title: "Resident Evil 4 Remake",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/2050650/header.jpg",
+                type: "action",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "AMD Ryzen 3 1200 أو Intel Core i5-7500",
+                        gpu: "AMD Radeon RX 560 أو NVIDIA GTX 1050 Ti",
+                        ram: "8GB",
+                        storage: "60GB HDD",
+                        os: "Windows 10/11 64-bit"
+                    },
+                    recommended: {
+                        cpu: "AMD Ryzen 5 3600 أو Intel Core i7-8700",
+                        gpu: "AMD Radeon RX 5700 أو NVIDIA GTX 1070",
+                        ram: "16GB",
+                        storage: "60GB SSD",
+                        os: "Windows 10/11 64-bit"
+                    }
+                }
+            },
+            {
+                id: 14,
+                title: "Starfield",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1716740/header.jpg",
+                type: "rpg",
+                level: "very-high",
+                requirements: {
+                    minimum: {
+                        cpu: "AMD Ryzen 5 2600X أو Intel Core i7-6800K",
+                        gpu: "AMD Radeon RX 5700 أو NVIDIA GTX 1070 Ti",
+                        ram: "16GB",
+                        storage: "125GB HDD",
+                        os: "Windows 10/11 64-bit"
+                    },
+                    recommended: {
+                        cpu: "AMD Ryzen 5 3600X أو Intel Core i5-10600K",
+                        gpu: "AMD Radeon RX 6800 XT أو NVIDIA RTX 2080",
+                        ram: "32GB",
+                        storage: "125GB SSD",
+                        os: "Windows 10/11 64-bit"
+                    }
+                }
+            },
+            {
+                id: 15,
+                title: "Hogwarts Legacy",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/990080/header.jpg",
+                type: "adventure",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-6600 أو AMD Ryzen 5 1400",
+                        gpu: "NVIDIA GTX 960 أو AMD RX 470",
+                        ram: "16GB",
+                        storage: "85GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-8700 أو AMD Ryzen 5 3600",
+                        gpu: "NVIDIA GTX 1080 Ti أو AMD RX 5700 XT",
+                        ram: "32GB",
+                        storage: "85GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 16,
+                title: "Minecraft",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1671340/header.jpg",
+                type: "adventure",
+                level: "low",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i3-3210 أو AMD A8-7600 APU",
+                        gpu: "Intel HD Graphics 4000 أو AMD Radeon R5",
+                        ram: "4GB",
+                        storage: "1GB HDD",
+                        os: "Windows 7 أو أحدث"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i5-4690 أو AMD A10-7800",
+                        gpu: "NVIDIA GeForce 700 Series أو AMD Radeon Rx 200",
+                        ram: "8GB",
+                        storage: "4GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 17,
+                title: "Rocket League",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/252950/header.jpg",
+                type: "sports",
+                level: "low",
+                requirements: {
+                    minimum: {
+                        cpu: "2.5GHz Dual-core",
+                        gpu: "NVIDIA GTX 760 أو AMD Radeon R7 270X",
+                        ram: "4GB",
+                        storage: "20GB HDD",
+                        os: "Windows 7/8/10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "3.0GHz Quad-core",
+                        gpu: "NVIDIA GTX 1060 أو AMD Radeon RX 580",
+                        ram: "8GB",
+                        storage: "20GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 18,
+                title: "Valorant",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1272080/header.jpg",
+                type: "fps",
+                level: "low",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i3-4150 أو AMD Ryzen 3 1200",
+                        gpu: "Intel HD Graphics 3000",
+                        ram: "4GB",
+                        storage: "10GB HDD",
+                        os: "Windows 7/8/10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i5-9400F أو AMD Ryzen 5 2600X",
+                        gpu: "NVIDIA GTX 1050 Ti أو AMD Radeon R7 370",
+                        ram: "8GB",
+                        storage: "10GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 19,
+                title: "Age of Empires IV",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1466860/header.jpg",
+                type: "strategy",
+                level: "medium",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-6300U أو AMD Ryzen 5 2400G",
+                        gpu: "Intel HD 520 أو AMD Radeon RX Vega 11",
+                        ram: "8GB",
+                        storage: "50GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i5-8600K أو AMD Ryzen 5 2600X",
+                        gpu: "NVIDIA GTX 970 أو AMD R9 390X",
+                        ram: "16GB",
+                        storage: "50GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 20,
+                title: "Microsoft Flight Simulator",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1250410/header.jpg",
+                type: "simulation",
+                level: "very-high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel i5-4460 أو AMD Ryzen 3 1200",
+                        gpu: "NVIDIA GTX 770 أو AMD Radeon RX 570",
+                        ram: "8GB",
+                        storage: "150GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel i7-9800X أو AMD Ryzen 7 Pro 2700X",
+                        gpu: "NVIDIA RTX 2080 أو AMD Radeon VII",
+                        ram: "32GB",
+                        storage: "150GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 21,
+                title: "God of War",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1593500/header.jpg",
+                type: "action",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel i5-2500k أو AMD Ryzen 3 1200",
+                        gpu: "NVIDIA GTX 960 أو AMD R9 290X",
+                        ram: "8GB",
+                        storage: "70GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel i5-6600k أو AMD Ryzen 5 2400 G",
+                        gpu: "NVIDIA GTX 1060 أو AMD RX 570",
+                        ram: "16GB",
+                        storage: "70GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 22,
+                title: "Spider-Man Remastered",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1817070/header.jpg",
+                type: "action",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i3-4160 أو AMD Ryzen 3 1200",
+                        gpu: "NVIDIA GTX 950 أو AMD RX 470",
+                        ram: "8GB",
+                        storage: "75GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i5-4670 أو AMD Ryzen 5 1600",
+                        gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                        ram: "16GB",
+                        storage: "75GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 23,
+                title: "The Last of Us Part I",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1888930/header.jpg",
+                type: "action",
+                level: "very-high",
+                requirements: {
+                    minimum: {
+                        cpu: "AMD Ryzen 5 1500X أو Intel Core i7-4770K",
+                        gpu: "AMD RX 470 أو NVIDIA GTX 970",
+                        ram: "16GB",
+                        storage: "100GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "AMD Ryzen 5 3600X أو Intel Core i7-8700",
+                        gpu: "AMD RX 5700 XT أو NVIDIA RTX 2070 Super",
+                        ram: "32GB",
+                        storage: "100GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 24,
+                title: "Dead Space Remake",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1693980/header.jpg",
+                type: "horror",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "AMD Ryzen 5 2600x أو Intel Core i5-8600",
+                        gpu: "AMD RX 5700 أو NVIDIA GTX 1070",
+                        ram: "16GB",
+                        storage: "50GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "AMD Ryzen 5 5600X أو Intel Core i5-11600K",
+                        gpu: "AMD RX 6700 XT أو NVIDIA RTX 2070",
+                        ram: "32GB",
+                        storage: "50GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 25,
+                title: "Call of Duty: Modern Warfare II",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1938090/header.jpg",
+                type: "fps",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-3570 أو AMD Ryzen 5 1600X",
+                        gpu: "NVIDIA GTX 960 أو AMD RX 470",
+                        ram: "8GB",
+                        storage: "125GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-4770K أو AMD Ryzen 7 1800X",
+                        gpu: "NVIDIA GTX 1080 أو AMD RX 5700 XT",
+                        ram: "16GB",
+                        storage: "125GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 26,
+                title: "Diablo IV",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/2344520/header.jpg",
+                type: "rpg",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-2500K أو AMD FX-8350",
+                        gpu: "NVIDIA GTX 660 أو AMD R9 280",
+                        ram: "8GB",
+                        storage: "90GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-8700K أو AMD Ryzen 7 2700X",
+                        gpu: "NVIDIA GTX 1080 أو AMD RX Vega 64",
+                        ram: "16GB",
+                        storage: "90GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 27,
+                title: "Baldur's Gate 3",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1086940/header.jpg",
+                type: "rpg",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-4690 أو AMD FX-8350",
+                        gpu: "NVIDIA GTX 970 أو AMD RX 480",
+                        ram: "8GB",
+                        storage: "150GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-8700K أو AMD Ryzen 5 3600",
+                        gpu: "NVIDIA GTX 2060 Super أو AMD RX 5700 XT",
+                        ram: "16GB",
+                        storage: "150GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 28,
+                title: "Street Fighter 6",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1364780/header.jpg",
+                type: "sports",
+                level: "medium",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-7500 أو AMD Ryzen 3 1200",
+                        gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                        ram: "8GB",
+                        storage: "60GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-8700 أو AMD Ryzen 5 3600",
+                        gpu: "NVIDIA RTX 2070 أو AMD RX 5700",
+                        ram: "16GB",
+                        storage: "60GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 29,
+                title: "Dead Island 2",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1946340/header.jpg",
+                type: "action",
+                level: "high",
+                requirements: {
+                    minimum: {
+                        cpu: "AMD FX-9590 أو Intel Core i7-7700HQ",
+                        gpu: "AMD RX 480 أو NVIDIA GTX 1060",
+                        ram: "10GB",
+                        storage: "70GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "AMD Ryzen 5 5600X أو Intel Core i9-9900K",
+                        gpu: "AMD RX 6600 XT أو NVIDIA RTX 2070 Super",
+                        ram: "16GB",
+                        storage: "70GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+                id: 30,
+                title: "Returnal",
+                image: "https://cdn.akamai.steamstatic.com/steam/apps/1649240/header.jpg",
+                type: "action",
+                level: "very-high",
+                requirements: {
+                    minimum: {
+                        cpu: "Intel Core i5-6400 أو AMD Ryzen 5 1500X",
+                        gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                        ram: "16GB",
+                        storage: "60GB HDD",
+                        os: "Windows 10 64-bit"
+                    },
+                    recommended: {
+                        cpu: "Intel Core i7-8700 أو AMD Ryzen 7 2700X",
+                        gpu: "NVIDIA RTX 2070 Super أو AMD RX 6700 XT",
+                        ram: "32GB",
+                        storage: "60GB SSD",
+                        os: "Windows 10 64-bit"
+                    }
+                }
+            },
+            {
+        id: 31,
+        title: "Horizon Zero Dawn",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1151640/header.jpg",
+        type: "action",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-2500K أو AMD FX-6300",
+                gpu: "NVIDIA GTX 970 أو AMD Radeon RX 470",
+                ram: "8GB",
+                storage: "100GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4770K أو AMD Ryzen 5 1500X",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "16GB",
+                storage: "100GB SSD",
+                os: "Windows 10 64-bit",
+            }
+        }
+    },
+   
+    {
+        id: 32,
+        title: "Battlefield 2042",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1517290/header.jpg",
+        type: "fps",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-6600K أو AMD Ryzen 5 1600",
+                gpu: "NVIDIA GTX 1050 Ti أو AMD RX 560",
+                ram: "8GB",
+                storage: "100GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-12700 أو AMD Ryzen 7 5800X",
+                gpu: "NVIDIA RTX 3060 أو AMD RX 6700 XT",
+                ram: "16GB",
+                storage: "100GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 33,
+        title: "DOOM Eternal",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/782330/header.jpg",
+        type: "fps",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-2500K أو AMD Ryzen 3 2200G",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "50GB HDD",
+                os: "Windows 7/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-6700K أو AMD Ryzen 7 1800X",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 5700",
+                ram: "16GB",
+                storage: "50GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 34,
+        title: "Sekiro: Shadows Die Twice",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/814380/header.jpg",
+        type: "action",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-2100 أو AMD FX-6300",
+                gpu: "NVIDIA GTX 760 أو AMD Radeon HD 7950",
+                ram: "4GB",
+                storage: "25GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-2500K أو AMD Ryzen 5 1400",
+                gpu: "NVIDIA GTX 970 أو AMD RX 570",
+                ram: "8GB",
+                storage: "25GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 35,
+        title: "Overwatch 2",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/2357570/header.jpg",
+        type: "fps",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3 أو AMD Phenom X3 8650",
+                gpu: "NVIDIA GTX 600 Series أو AMD Radeon HD 7000 Series",
+                ram: "6GB",
+                storage: "50GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7 أو AMD Ryzen 5",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "8GB",
+                storage: "50GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 36,
+        title: "Far Cry 6",
+        image: "https://cdn2.unrealengine.com/tetra-preorder-standard-edition-epic-store-landscape-2560x1440-2560x1440-430970417.jpg",
+        type: "action",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "AMD Ryzen 3 1200 أو Intel Core i5-4460",
+                gpu: "AMD RX 460 أو NVIDIA GTX 970",
+                ram: "8GB",
+                storage: "60GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "AMD Ryzen 5 3600X أو Intel Core i7-9700",
+                gpu: "AMD RX 5700 XT أو NVIDIA RTX 2070",
+                ram: "16GB",
+                storage: "60GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 37,
+        title: "Stellaris",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/281990/header.jpg",
+        type: "strategy",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-530 أو AMD FX-6350",
+                gpu: "NVIDIA GTX 460 أو AMD Radeon HD 5870",
+                ram: "4GB",
+                storage: "10GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-3570 أو AMD Ryzen 5 2400G",
+                gpu: "NVIDIA GTX 970 أو AMD RX 570",
+                ram: "8GB",
+                storage: "10GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 38,
+        title: "Monster Hunter: World",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/582010/header.jpg",
+        type: "rpg",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-4460 أو AMD FX-6300",
+                gpu: "NVIDIA GTX 970 أو AMD Radeon RX 470",
+                ram: "8GB",
+                storage: "48GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4770 أو AMD Ryzen 5 1500X",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 5700",
+                ram: "8GB",
+                storage: "48GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 39,
+        title: "Cities: Skylines",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/255710/header.jpg",
+        type: "simulation",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i7-930 أو AMD FX-6350",
+                gpu: "NVIDIA GTX 260 أو AMD Radeon HD 5670",
+                ram: "4GB",
+                storage: "4GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-2700K أو AMD Ryzen 7 2700X",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "4GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 40,
+        title: "Dark Souls III",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/374320/header.jpg",
+        type: "rpg",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-2100 أو AMD FX-6300",
+                gpu: "NVIDIA GTX 750 Ti أو AMD Radeon HD 7950",
+                ram: "4GB",
+                storage: "25GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-3770 أو AMD FX-8350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 570",
+                ram: "8GB",
+                storage: "25GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 41,
+        title: "Total War: Warhammer III",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1142710/header.jpg",
+        type: "strategy",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-4130 أو AMD FX-8350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "6GB",
+                storage: "120GB HDD",
+                os: "Windows 7/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-6600 أو AMD Ryzen 5 2600X",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 5700 XT",
+                ram: "8GB",
+                storage: "120GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 42,
+        title: "No Man's Sky",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/275850/header.jpg",
+        type: "adventure",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "10GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5 أو AMD Ryzen 5",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "8GB",
+                storage: "10GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 43,
+        title: "Among Us",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/945360/header.jpg",
+        type: "puzzle",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "Intel Pentium 4 1.5GHz",
+                gpu: "Intel HD Graphics",
+                ram: "1GB",
+                storage: "250MB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 650 أو AMD Radeon HD 7750",
+                ram: "4GB",
+                storage: "250MB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 44,
+        title: "Fallout 4",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/377160/header.jpg",
+        type: "rpg",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-2300 أو AMD Phenom II X4 945",
+                gpu: "NVIDIA GTX 550 Ti أو AMD Radeon HD 7870",
+                ram: "8GB",
+                storage: "30GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4790 أو AMD FX-9590",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "30GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 45,
+        title: "Genshin Impact",
+        image: "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2025/01/genshin-impact-main-characters-resting.jpg",
+        type: "rpg",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD Radeon RX 580",
+                ram: "8GB",
+                storage: "30GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7 أو AMD Ryzen 5",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 5700",
+                ram: "16GB",
+                storage: "30GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 46,
+        title: "Destiny 2",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1085660/header.jpg",
+        type: "fps",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-3250 أو AMD FX-4350",
+                gpu: "NVIDIA GTX 970 أو AMD Radeon HD 7850",
+                ram: "6GB",
+                storage: "105GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-2400 أو AMD Ryzen 5 1600X",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "8GB",
+                storage: "105GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 47,
+        title: "The Elder Scrolls V: Skyrim",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/489830/header.jpg",
+        type: "rpg",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-750 أو AMD Phenom II X4-945",
+                gpu: "NVIDIA GTX 470 أو AMD Radeon HD 7870",
+                ram: "8GB",
+                storage: "12GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-2400 أو AMD FX-8320",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "12GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 48,
+        title: "Hades",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1145360/header.jpg",
+        type: "action",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "Dual Core 2.4GHz",
+                gpu: "Intel HD Graphics 5000 أو NVIDIA GeForce GTX 650",
+                ram: "4GB",
+                storage: "15GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Dual Core 3.0GHz",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "15GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 49,
+        title: "Sid Meier's Civilization VI",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/289070/header.jpg",
+        type: "strategy",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-2100 أو AMD معادل",
+                gpu: "NVIDIA GTX 450 أو AMD Radeon HD 5570",
+                ram: "4GB",
+                storage: "12GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-5300U أو AMD Ryzen 5",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "12GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 50,
+        title: "Need for Speed Heat",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1222680/header.jpg",
+        type: "racing",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-3570 أو AMD FX-6350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "50GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4790 أو AMD Ryzen 5 1600",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "16GB",
+                storage: "50GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 51,
+        title: "Ghost of Tsushima",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/2215430/header.jpg",
+        type: "action",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-6600 أو AMD Ryzen 5 1600",
+                gpu: "NVIDIA GTX 970 أو AMD RX 5500 XT",
+                ram: "8GB",
+                storage: "75GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-6700K أو AMD Ryzen 7 3700X",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 6600 XT",
+                ram: "16GB",
+                storage: "75GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 52,
+        title: "Portal 2",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/620/header.jpg",
+        type: "puzzle",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "3.0 GHz P4 أو Dual Core 2.0",
+                gpu: "NVIDIA GTX 260 أو AMD Radeon HD 4850",
+                ram: "2GB",
+                storage: "8GB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "4GB",
+                storage: "8GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 53,
+        title: "Rainbow Six Siege",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/359550/header.jpg",
+        type: "fps",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-560 أو AMD Phenom II X4 945",
+                gpu: "NVIDIA GTX 460 أو AMD Radeon HD 5870",
+                ram: "6GB",
+                storage: "61GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-2500K أو AMD FX-8120",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "61GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 54,
+        title: "Divinity: Original Sin 2",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/435150/header.jpg",
+        type: "rpg",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-2400 أو AMD FX-6100",
+                gpu: "NVIDIA GTX 550 Ti أو AMD Radeon HD 7770",
+                ram: "4GB",
+                storage: "60GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-2600 أو AMD FX-8350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "60GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 55,
+        title: "F1 23",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/2108330/header.jpg",
+        type: "racing",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-2130 أو AMD FX-4300",
+                gpu: "NVIDIA GTX 1050 Ti أو AMD RX 470",
+                ram: "8GB",
+                storage: "80GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-9600K أو AMD Ryzen 5 2600X",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 6700 XT",
+                ram: "16GB",
+                storage: "80GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 56,
+        title: "Outlast",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/238320/header.jpg",
+        type: "horror",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-530 أو AMD معادل",
+                gpu: "NVIDIA GTX 260 أو AMD Radeon HD 4870",
+                ram: "4GB",
+                storage: "5GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "5GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 57,
+        title: "Tomb Raider",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/203160/header.jpg",
+        type: "adventure",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-2100 أو AMD معادل",
+                gpu: "NVIDIA GTX 650 أو AMD Radeon HD 7770",
+                ram: "4GB",
+                storage: "12GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-3770 أو AMD FX-8350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "12GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 58,
+        title: "Hitman 3",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1659040/header.jpg",
+        type: "action",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-2500K أو AMD Phenom II X4 940",
+                gpu: "NVIDIA GTX 970 أو AMD Radeon RX 470",
+                ram: "8GB",
+                storage: "80GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4790 أو AMD Ryzen 5 1600",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 5700 XT",
+                ram: "16GB",
+                storage: "80GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 59,
+        title: "League of Legends",
+        image: "https://cdn1.epicgames.com/offer/24b9b5e323bc40eea252a10cdd3b2f10/EGS_LeagueofLegends_RiotGames_S1_2560x1440-80471666c140f790f28dff68d72c384b",
+        type: "strategy",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core 2 Duo E6600 أو AMD Phenom X4",
+                gpu: "NVIDIA GeForce 8800 أو AMD Radeon HD 5670",
+                ram: "2GB",
+                storage: "16GB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i5 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "4GB",
+                storage: "16GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 60,
+        title: "Control",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/870780/header.jpg",
+        type: "action",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-4690 أو AMD FX-4350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "42GB HDD",
+                os: "Windows 7/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-7600K أو AMD Ryzen 5 1600X",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 580",
+                ram: "16GB",
+                storage: "42GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 61,
+        title: "The Sims 4",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1222670/header.jpg",
+        type: "simulation",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-3220 أو AMD Ryzen 3 1200",
+                gpu: "NVIDIA GTX 650 أو AMD Radeon HD 7750",
+                ram: "4GB",
+                storage: "25GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-6500 أو AMD Ryzen 5 1500X",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "25GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 62,
+        title: "Death Stranding",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1190460/header.jpg",
+        type: "adventure",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-3470 أو AMD Ryzen 3 1200",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "80GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-3770 أو AMD Ryzen 5 1600",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 5700",
+                ram: "16GB",
+                storage: "80GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 63,
+        title: "Phasmophobia",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/739630/header.jpg",
+        type: "horror",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-45919 أو AMD FX-8350",
+                gpu: "NVIDIA GTX 970 أو AMD Radeon R9 290",
+                ram: "8GB",
+                storage: "18GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-7600K أو AMD Ryzen 5 1600X",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 580",
+                ram: "16GB",
+                storage: "18GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 64,
+        title: "Mortal Kombat 11",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/976310/header.jpg",
+        type: "sports",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-750 أو AMD Phenom II X4",
+                gpu: "NVIDIA GTX 970 أو AMD RX 570",
+                ram: "8GB",
+                storage: "52GB HDD",
+                os: "Windows 7/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i3-2100 أو AMD FX-6300",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "8GB",
+                storage: "52GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 65,
+        title: "Cyber Shadow",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/861250/header.jpg",
+        type: "action",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "2.0GHz أو أعلى",
+                gpu: "NVIDIA GTX 650 أو AMD Radeon HD 7750",
+                ram: "1GB",
+                storage: "250MB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "2GB",
+                storage: "250MB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 66,
+        title: "Planet Zoo",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/703080/header.jpg",
+        type: "simulation",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-2500 أو AMD FX-6350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "16GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4770K أو AMD Ryzen 5 1600",
+                gpu: "NVIDIA GTX 1070 أو AMD RX 580",
+                ram: "16GB",
+                storage: "16GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 67,
+        title: "Shadow of the Tomb Raider",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/750920/header.jpg",
+        type: "adventure",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-3220 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "40GB HDD",
+                os: "Windows 7/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4770K أو AMD Ryzen 5 1600",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "16GB",
+                storage: "40GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 68,
+        title: "Team Fortress 2",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/440/header.jpg",
+        type: "fps",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "1.7 GHz أو أعلى",
+                gpu: "DirectX 8.1 compatible GPU",
+                ram: "512MB",
+                storage: "15GB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "1GB",
+                storage: "15GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 69,
+        title: "Disco Elysium",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/632470/header.jpg",
+        type: "rpg",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu垂: "Intel Core i5-7500 أو AMD معادل",
+                gpu: "Intel HD 620 أو AMD معادل",
+                ram: "4GB",
+                storage: "20GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-9700K أو AMD Ryzen 5 3600",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "20GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 70,
+        title: "Gran Turismo 7",
+        image: "https://simracingnerd.com/wp-content/uploads/2024/12/Gran-turismo-7-sur-pc-date-de-sortie-1080x675.jpg",
+        type: "racing",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-6500 أو AMD Ryzen 3 1200",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "60GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-8700K أو AMD Ryzen 5 5600X",
+                gpu: "NVIDIA RTX 3060 أو AMD RX 6700 XT",
+                ram: "16GB",
+                storage: "60GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 71,
+        title: "Sniper Elite 5",
+        image: "https://static1.srcdn.com/wordpress/wp-content/uploads/2021/12/sniper-elite-5-2022-launch-announced-01b.jpg",
+        type: "fps",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-9100 أو AMD Ryzen 3 2300X",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "85GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-8400 أو AMD Ryzen 5 2600",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 5700",
+                ram: "16GB",
+                storage: "85GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 72,
+        title: "Frostpunk",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/323190/header.jpg",
+        type: "strategy",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 660 أو AMD Radeon HD 7870",
+                ram: "4GB",
+                storage: "8GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7 أو AMD Ryzen 5",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "8GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 73,
+        title: "Resident Evil Village",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1196590/header.jpg",
+        type: "horror",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-7500 أو AMD Ryzen 3 1200",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "35GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-8700 أو AMD Ryzen 5 3600",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 6700 XT",
+                ram: "16GB",
+                storage: "35GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 74,
+        title: "Crusader Kings III",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1158310/header.jpg",
+        type: "strategy",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-2120 أو AMD FX-6350",
+                gpu: "NVIDIA GTX 660 أو AMD Radeon HD 7870",
+                ram: "6GB",
+                storage: "8GB HDD",
+                os: "Windows 8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-4670K أو AMD Ryzen 5 2400G",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "8GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 75,
+        title: "Days Gone",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1257930/header.jpg",
+        type: "action",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-2500K أو AMD FX-6300",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "70GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4770K أو AMD Ryzen 5 1500X",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "16GB",
+                storage: "70GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 76,
+        title: "Subnautica",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/264710/header.jpg",
+        type: "adventure",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "Intel HD 630 أو NVIDIA GTX 650",
+                ram: "4GB",
+                storage: "20GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5 أو AMD Ryzen 5",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "20GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 77,
+        title: "NBA 2K23",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1919590/header.jpg",
+        type: "sports",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-2100 أو AMD FX-4100",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "4GB",
+                storage: "110GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-4430 أو AMD FX-8370",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "8GB",
+                storage: "110GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 78,
+        title: "It Takes Two",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1426210/header.jpg",
+        type: "adventure",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-2100T أو AMD FX-6100",
+                gpu: "NVIDIA GTX 660 أو AMD Radeon HD 7870",
+                ram: "8GB",
+                storage: "50GB HDD",
+                os: "Windows 8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-3570K أو AMD Ryzen 3 1300X",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "16GB",
+                storage: "50GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 79,
+        title: "Cuphead",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/268910/header.jpg",
+        type: "action",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core2 Duo E8400 أو AMD معادل",
+                gpu: "NVIDIA GTX 650 أو AMD Radeon HD 7750",
+                ram: "2GB",
+                storage: "4GB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "3GB",
+                storage: "4GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 81,
+        title: "Metro Exodus",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/412020/header.jpg",
+        type: "fps",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-4440 أو AMD FX-8370",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "59GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4770K أو AMD Ryzen 5 1500X",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 5700",
+                ram: "16GB",
+                storage: "59GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 82,
+        title: "Stardew Valley",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/413150/header.jpg",
+        type: "simulation",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "2 GHz أو أعلى",
+                gpu: "256 MB VRAM، Shader Model 3.0+",
+                ram: "2GB",
+                storage: "500MB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "4GB",
+                storage: "500MB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 83,
+        title: "Borderlands 3",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/397540/header.jpg",
+        type: "fps",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-3570 أو AMD FX-8350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "6GB",
+                storage: "75GB HDD",
+                os: "Windows 7/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-4770 أو AMD Ryzen 5 2600",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 5700",
+                ram: "16GB",
+                storage: "75GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 84,
+        title: "Hollow Knight",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/367520/header.jpg",
+        type: "adventure",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core 2 Duo E5200",
+                gpu: "NVIDIA GTX 650 أو AMD Radeon HD 7750",
+                ram: "4GB",
+                storage: "9GB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i5 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "9GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 85,
+        title: "Tekken 8",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1778820/header.jpg",
+        type: "sports",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-6600K أو AMD Ryzen 3 1300X",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "60GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-7700K أو AMD Ryzen 5 3600",
+                gpu: "NVIDIA RTX 2070 أو AMD RX 6700 XT",
+                ram: "16GB",
+                storage: "60GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 86,
+        title: "The Outer Worlds",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/578650/header.jpg",
+        type: "rpg",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-3225 أو AMD FX-6300",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "4GB",
+                storage: "40GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-7700 أو AMD Ryzen 5 1600",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "8GB",
+                storage: "40GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 87,
+        title: "A Plague Tale: Requiem",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1182900/header.jpg",
+        type: "adventure",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-4690 أو AMD FX-8300",
+                gpu: "NVIDIA GTX 970 أو AMD RX 590",
+                ram: "16GB",
+                storage: "55GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-8700 أو AMD Ryzen 5 3600",
+                gpu: "NVIDIA RTX 3070 أو AMD RX 6800",
+                ram: "16GB",
+                storage: "55GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 88,
+        title: "Warframe",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/230410/header.jpg",
+        type: "action",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core 2 Duo e6400 أو AMD Athlon x64 4000+",
+                gpu: "NVIDIA GTX 650 أو AMD Radeon HD 7750",
+                ram: "4GB",
+                storage: "35GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "35GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 89,
+        title: "Dying Light 2",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/534380/header.jpg",
+        type: "action",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-9100 أو AMD Ryzen 3 2300X",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "60GB HDD",
+                os: "Windows 7/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-8600K أو AMD Ryzen 5 3600",
+                gpu: "NVIDIA RTX 2060 أو AMD RX 6700 XT",
+                ram: "16GB",
+                storage: "60GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 90,
+        title: "Celeste",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/504230/header.jpg",
+        type: "adventure",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3 M380",
+                gpu: "Intel HD 4000",
+                ram: "2GB",
+                storage: "1.2GB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i5 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "4GB",
+                storage: "1.2GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 91,
+        title: "Ghostrunner",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1139900/header.jpg",
+        type: "action",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-2500K أو AMD FX-8350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "8GB",
+                storage: "22GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-6700K أو AMD Ryzen 5 1500X",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "16GB",
+                storage: "22GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 92,
+        title: "Factorio",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/427520/header.jpg",
+        type: "strategy",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Dual core 3GHz+",
+                gpu: "NVIDIA GTX 650 أو AMD Radeon HD 7750",
+                ram: "4GB",
+                storage: "1GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Quad core 3GHz+",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "1GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 93,
+        title: "Sea of Thieves",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1172620/header.jpg",
+        type: "adventure",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-4130 أو AMD FX-8350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "4GB",
+                storage: "50GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-4690 أو AMD Ryzen 5 1500X",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "8GB",
+                storage: "50GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 94,
+        title: "Ori and the Will of the Wisps",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1057090/header.jpg",
+        type: "adventure",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i5-4460 أو AMD FX-6300",
+                gpu: "NVIDIA GTX 950 أو AMD R7 370",
+                ram: "8GB",
+                storage: "20GB HDD",
+                os: "Windows 10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-6600 أو AMD Ryzen 3 1200",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "8GB",
+                storage: "20GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 95,
+        title: "GTA: San Andreas",
+        image: "https://www.notebookcheck.biz/fileadmin/Notebooks/News/_nc4/Grand-Theft-Auto-SA.jpg",
+        type: "action",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "1GHz Intel Pentium III أو AMD Athlon",
+                gpu: "NVIDIA GeForce 3 أو معادل",
+                ram: "256MB",
+                storage: "3.6GB HDD",
+                os: "Windows XP/Vista/7"
+            },
+            recommended: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "512MB",
+                storage: "3.6GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 96,
+        title: "Kena: Bridge of Spirits",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/1954200/header.jpg",
+        type: "adventure",
+        level: "high",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-3220 أو AMD FX-6100",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "12GB",
+                storage: "25GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i7-6700 أو AMD Ryzen 7 1700",
+                gpu: "NVIDIA GTX 1070 أو AMD RX 580",
+                ram: "16GB",
+                storage: "25GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 97,
+        title: "Left 4 Dead 2",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/550/header.jpg",
+        type: "fps",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "Intel Pentium 4 3.0GHz",
+                gpu: "NVIDIA GTX 660 أو AMD Radeon HD 4850",
+                ram: "2GB",
+                storage: "13GB HDD",
+                os: "Windows 7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "4GB",
+                storage: "13GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 98,
+        title: "Risk of Rain 2",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/632360/header.jpg",
+        type: "action",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core i3-6100 أو AMD FX-8350",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "4GB",
+                storage: "4GB HDD",
+                os: "Windows 7/8/10 64-bit"
+            },
+            recommended: {
+                cpu: "Intel Core i5-4670 أو AMD Ryzen 5 1500X",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "8GB",
+                storage: "4GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 99,
+        title: "Witcher 2: Assassins of Kings",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/20920/header.jpg",
+        type: "rpg",
+        level: "medium",
+        requirements: {
+            minimum: {
+                cpu: "Intel Core 2 Duo 2.2GHz أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 470",
+                ram: "1.5GB",
+                storage: "25GB HDD",
+                os: "Windows XP/Vista/7"
+            },
+            recommended: {
+                cpu: "Intel Core i5 أو AMD معادل",
+                gpu: "NVIDIA GTX 1060 أو AMD RX 580",
+                ram: "4GB",
+                storage: "25GB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+    {
+        id: 100,
+        title: "Terraria",
+        image: "https://cdn.akamai.steamstatic.com/steam/apps/105600/header.jpg",
+        type: "adventure",
+        level: "low",
+        requirements: {
+            minimum: {
+                cpu: "2.0 GHz",
+                gpu: "128MB VRAM",
+                ram: "2GB",
+                storage: "200MB HDD",
+                os: "Windows XP/Vista/7/8/10"
+            },
+            recommended: {
+                cpu: "Intel Core i3 أو AMD معادل",
+                gpu: "NVIDIA GTX 970 أو AMD RX 580",
+                ram: "4GB",
+                storage: "200MB SSD",
+                os: "Windows 10 64-bit"
+            }
+        }
+    },
+  
+
+];
+
+        // قوائم قطع الهاردوير للاقتراحات (تم توسيعها)
+        const hardwareSuggestions = {
+            cpu: [
+                "Intel Core i3-10100",
+                "Intel Core i5-10400",
+                "Intel Core i5-12400",
+                "Intel Core i7-10700",
+                "Intel Core i9-10900K",
+                "Intel Core i5-12600K",
+                "Intel Core i7-12700K",
+                "Intel Core i9-12900K",
+                "AMD Ryzen 3 3100",
+                "AMD Ryzen 5 3600",
+                "AMD Ryzen 5 5600X",
+                "AMD Ryzen 7 5800X",
+                "AMD Ryzen 9 5900X",
+                "AMD Ryzen 5 7600X",
+                "AMD Ryzen 7 7700X",
+                "AMD Ryzen 9 7900X"
+            ],
+            gpu: [
+                "NVIDIA GTX 1650",
+                "NVIDIA GTX 1660 Super",
+                "NVIDIA RTX 2060",
+                "NVIDIA RTX 3060",
+                "NVIDIA RTX 3060 Ti",
+                "NVIDIA RTX 3070",
+                "NVIDIA RTX 3080",
+                "NVIDIA RTX 3090",
+                "NVIDIA RTX 4060",
+                "NVIDIA RTX 4070",
+                "NVIDIA RTX 4080",
+                "NVIDIA RTX 4090",
+                "AMD RX 5500 XT",
+                "AMD RX 5600 XT",
+                "AMD RX 5700 XT",
+                "AMD RX 6600",
+                "AMD RX 6700 XT",
+                "AMD RX 6800",
+                "AMD RX 6800 XT",
+                "AMD RX 6900 XT",
+                "AMD RX 7900 XT",
+                "AMD RX 7900 XTX"
+            ]
+        };
+
+        // قاعدة بيانات أداء المعالجات والكروت (مبسطة)
+        const performanceDatabase = {
+            cpus: {
+                "Intel Core i3-10100": 7500,
+                "Intel Core i5-10400": 9500,
+                "Intel Core i5-12400": 13500,
+                "Intel Core i7-10700": 14500,
+                "Intel Core i9-10900K": 18000,
+                "Intel Core i5-12600K": 19500,
+                "Intel Core i7-12700K": 23000,
+                "Intel Core i9-12900K": 28000,
+                "AMD Ryzen 3 3100": 8000,
+                "AMD Ryzen 5 3600": 12000,
+                "AMD Ryzen 5 5600X": 16500,
+                "AMD Ryzen 7 5800X": 19500,
+                "AMD Ryzen 9 5900X": 24000,
+                "AMD Ryzen 5 7600X": 21000,
+                "AMD Ryzen 7 7700X": 25000,
+                "AMD Ryzen 9 7900X": 30000,
+                "Intel Core i5-2500K": 3500,
+                "AMD FX-8310": 3200,
+                "Intel Core i7-4790": 6500,
+                "AMD Ryzen 3 3200G": 5500,
+                "Intel Core i5-3570K": 4000,
+                "AMD FX-6300": 3000,
+                "Intel Core i5-8400": 8500,
+                "AMD Ryzen 3 3300X": 9000,
+                "Intel Core i7-8700K": 12000,
+                "AMD Ryzen 5 3600X": 12500
+            },
+            gpus: {
+                "NVIDIA GTX 1650": 3500,
+                "NVIDIA GTX 1660 Super": 5000,
+                "NVIDIA RTX 2060": 6500,
+                "NVIDIA RTX 3060": 8500,
+                "NVIDIA RTX 3060 Ti": 10000,
+                "NVIDIA RTX 3070": 12000,
+                "NVIDIA RTX 3080": 15000,
+                "NVIDIA RTX 3090": 18000,
+                "NVIDIA RTX 4060": 9000,
+                "NVIDIA RTX 4070": 13000,
+                "NVIDIA RTX 4080": 18000,
+                "NVIDIA RTX 4090": 22000,
+                "AMD RX 5500 XT": 4000,
+                "AMD RX 5600 XT": 6000,
+                "AMD RX 5700 XT": 8000,
+                "AMD RX 6600": 7500,
+                "AMD RX 6700 XT": 11000,
+                "AMD RX 6800": 13000,
+                "AMD RX 6800 XT": 15000,
+                "AMD RX 6900 XT": 17000,
+                "AMD RX 7900 XT": 19000,
+                "AMD RX 7900 XTX": 21000,
+                "NVIDIA GTX 780": 2500,
+                "AMD Radeon RX 470": 3000,
+                "NVIDIA GTX 1060": 4500,
+                "AMD Radeon R9 Fury": 4000,
+                "NVIDIA GTX 770": 2000,
+                "AMD Radeon R9 280": 2200,
+                "NVIDIA GTX 660": 1500,
+                "AMD Radeon HD 7870": 1400,
+                "NVIDIA GTX 1060 3GB": 4000,
+                "AMD RX 580": 4500,
+                "NVIDIA GTX 1070": 5500,
+                "AMD RX Vega 56": 6000
+            }
+        };
+
+        // متغيرات التصفية
+        let activeFilters = {
+            type: "all",
+            level: "all",
+            compatible: "all"
+        };
+
+        // متغيرات النظام الحالي للمستخدم
+        let userSystem = {
+            cpu: "",
+            gpu: "",
+            ram: 8
+        };
+
+        // لعبة محددة للتفاصيل
+        let currentGameDetails = null;
+
+        // تحميل متدرج
+        let currentPage = 1;
+        const gamesPerPage = 10;
+        let isLoading = false;
+
+        // عرض الألعاب مع التحميل المتدرج
+        function displayGames(gamesToDisplay = games, reset = false) {
+            if (reset) {
+                currentPage = 1;
+                const container = document.getElementById('games-container');
+                container.innerHTML = '';
+            }
+            
+            const container = document.getElementById('games-container');
+            const startIndex = (currentPage - 1) * gamesPerPage;
+            const endIndex = startIndex + gamesPerPage;
+            const gamesToShow = gamesToDisplay.slice(0, endIndex);
+            
+            // عرض هيكل التحميل المؤقت
+            if (gamesToShow.length < gamesToDisplay.length && !isLoading) {
+                document.getElementById('loading-skeleton').style.display = 'grid';
+                document.getElementById('progress-bar').style.display = 'block';
+                updateProgressBar((gamesToShow.length / gamesToDisplay.length) * 100);
+            } else {
+                document.getElementById('loading-skeleton').style.display = 'none';
+                document.getElementById('progress-bar').style.display = 'none';
+            }
+            
+            // إضافة الألعاب الجديدة فقط
+            const currentCount = container.children.length;
+            for (let i = currentCount; i < gamesToShow.length; i++) {
+                const game = gamesToShow[i];
+                
+                // التحقق من توافق اللعبة مع نظام المستخدم إذا كان مطلوباً
+                let isCompatible = true;
+                let isFullyCompatible = true;
+                
+                if (userSystem.cpu && userSystem.gpu && userSystem.ram) {
+                    const minRam = parseInt(game.requirements.minimum.ram);
+                    const recRam = parseInt(game.requirements.recommended.ram);
+                    
+                    isCompatible = userSystem.ram >= minRam;
+                    isFullyCompatible = userSystem.ram >= recRam;
+                }
+                
+                // تطبيق فلاتر التوافق
+                if (activeFilters.compatible === "full" && !isFullyCompatible) continue;
+                if (activeFilters.compatible === "partial" && (!isCompatible || isFullyCompatible)) continue;
+                
+                const gameCard = document.createElement('div');
+                gameCard.className = 'game-card';
+                gameCard.setAttribute('data-type', game.type);
+                gameCard.setAttribute('data-level', game.level);
+                gameCard.style.animationDelay = `${(i % gamesPerPage) * 0.1}s`;
+                
+                gameCard.innerHTML = `
+                    ${userSystem.cpu && userSystem.gpu && userSystem.ram ? `
+                    <div class="compatibility-badge" style="background-color: ${isFullyCompatible ? 'var(--success)' : isCompatible ? 'var(--warning)' : 'var(--danger)'}">
+                        ${isFullyCompatible ? 'متوافق بالكامل' : isCompatible ? 'متوافق جزئياً' : 'غير متوافق'}
+                    </div>
+                    ` : ''}
+                    <img src="${game.image}" alt="${game.title}" class="game-image">
+                    <div class="game-content">
+                        <h3 class="game-title">${game.title}</h3>
+                        <div class="game-meta">
+                            <span>${getTypeName(game.type)}</span>
+                            <span>${getLevelName(game.level)}</span>
+                        </div>
+                    </div>
+                `;
+                
+                gameCard.addEventListener('click', () => {
+                    showGameDetails(game);
+                });
+                
+                container.appendChild(gameCard);
+            }
+            
+            isLoading = false;
+        }
+
+        function updateProgressBar(percent) {
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = `${percent}%`;
+        }
+
+        // ترجمة نوع اللعبة
+        function getTypeName(type) {
+            const types = {
+                action: "أكشن",
+                adventure: "مغامرات",
+                strategy: "إستراتيجية",
+                rpg: "ألعاب أدوار",
+                sports: "رياضية",
+                fps: "أول شخص",
+                racing: "سباقات",
+                simulation: "محاكاة",
+                mmo: "ألعاب جماعية",
+                horror: "رعب",
+                puzzle: "ألغاز"
+            };
+            return types[type] || type;
+        }
+
+        // ترجمة مستوى المتطلبات
+        function getLevelName(level) {
+            const levels = {
+                low: "منخفضة",
+                medium: "متوسطة",
+                high: "عالية",
+                "very-high": "عالية جداً"
+            };
+            return levels[level] || level;
+        }
+
+        // تصفية الألعاب
+        function filterGames() {
+            let filteredGames = games;
+            
+            if (activeFilters.type !== "all") {
+                filteredGames = filteredGames.filter(game => game.type === activeFilters.type);
+            }
+            
+            if (activeFilters.level !== "all") {
+                filteredGames = filteredGames.filter(game => game.level === activeFilters.level);
+            }
+            
+            displayGames(filteredGames, true);
+        }
+
+        // عرض تفاصيل اللعبة
+        function showGameDetails(game) {
+            currentGameDetails = game;
+            
+            // تعبئة البيانات
+            document.getElementById('detail-game-image').src = game.image;
+            document.getElementById('detail-game-image').alt = game.title;
+            document.getElementById('detail-game-title').textContent = game.title;
+            
+            // المتطلبات الدنيا
+            document.getElementById('min-cpu').textContent = game.requirements.minimum.cpu;
+            document.getElementById('min-gpu').textContent = game.requirements.minimum.gpu;
+            document.getElementById('min-ram').textContent = game.requirements.minimum.ram;
+            document.getElementById('min-storage').textContent = game.requirements.minimum.storage;
+            document.getElementById('min-os').textContent = game.requirements.minimum.os;
+            
+            // المتطلبات الموصى بها
+            document.getElementById('rec-cpu').textContent = game.requirements.recommended.cpu;
+            document.getElementById('rec-gpu').textContent = game.requirements.recommended.gpu;
+            document.getElementById('rec-ram').textContent = game.requirements.recommended.ram;
+            document.getElementById('rec-storage').textContent = game.requirements.recommended.storage;
+            document.getElementById('rec-os').textContent = game.requirements.recommended.os;
+            
+            // إظهار الشاشة
+            document.getElementById('game-details').classList.add('active');
+            
+            // إخفاء نتائج التحليل السابقة
+            document.getElementById('compatibility-results').classList.remove('active');
+            
+            // تعبئة بيانات المستخدم إذا كانت موجودة
+            if (userSystem.cpu) {
+                document.getElementById('user-cpu').value = userSystem.cpu;
+            }
+            if (userSystem.gpu) {
+                document.getElementById('user-gpu').value = userSystem.gpu;
+            }
+            if (userSystem.ram) {
+                document.getElementById('user-ram').value = userSystem.ram;
+            }
+        }
+
+        // إغلاق تفاصيل اللعبة
+        function closeGameDetails() {
+            document.getElementById('game-details').classList.remove('active');
+        }
+
+        // تحليل توافق النظام (محسن)
+        function checkCompatibility() {
+            if (!currentGameDetails) return;
+            
+            // الحصول على مواصفات المستخدم
+            userSystem.cpu = document.getElementById('user-cpu').value.trim();
+            userSystem.gpu = document.getElementById('user-gpu').value.trim();
+            userSystem.ram = parseInt(document.getElementById('user-ram').value);
+            
+            // تحليل التوافق مع خوارزمية محسنة
+            const minRam = parseInt(currentGameDetails.requirements.minimum.ram);
+            const recRam = parseInt(currentGameDetails.requirements.recommended.ram);
+            
+            // تحليل المعالج
+            const userCpuPerf = performanceDatabase.cpus[userSystem.cpu] || 0;
+            const minCpuText = currentGameDetails.requirements.minimum.cpu;
+            const recCpuText = currentGameDetails.requirements.recommended.cpu;
+            
+            // استخراج أقوى معالج من المتطلبات
+            const minCpuKey = Object.keys(performanceDatabase.cpus).find(cpu => 
+                minCpuText.includes(cpu)
+            );
+            
+            const recCpuKey = Object.keys(performanceDatabase.cpus).find(cpu => 
+                recCpuText.includes(cpu)
+            );
+            
+            const minCpuPerf = minCpuKey ? performanceDatabase.cpus[minCpuKey] : 0;
+            const recCpuPerf = recCpuKey ? performanceDatabase.cpus[recCpuKey] : 0;
+            
+            // تحليل كرت الشاشة
+            const userGpuPerf = performanceDatabase.gpus[userSystem.gpu] || 0;
+            const minGpuText = currentGameDetails.requirements.minimum.gpu;
+            const recGpuText = currentGameDetails.requirements.recommended.gpu;
+            
+            // استخراج أقوى كرت شاشة من المتطلبات
+            const minGpuKey = Object.keys(performanceDatabase.gpus).find(gpu => 
+                minGpuText.includes(gpu)
+            );
+            
+            const recGpuKey = Object.keys(performanceDatabase.gpus).find(gpu => 
+                recGpuText.includes(gpu)
+            );
+            
+            const minGpuPerf = minGpuKey ? performanceDatabase.gpus[minGpuKey] : 0;
+            const recGpuPerf = recGpuKey ? performanceDatabase.gpus[recGpuKey] : 0;
+            
+            // حساب نسبة التوافق
+            const cpuCompatibility = userCpuPerf / recCpuPerf;
+            const gpuCompatibility = userGpuPerf / recGpuPerf;
+            const ramCompatibility = userSystem.ram / recRam;
+            
+            // تحديد حالة التوافق لكل مكون
+            const getCompatibilityStatus = (compatibility) => {
+                if (compatibility >= 1) return "compatible";
+                if (compatibility >= 0.7) return "partially-compatible";
+                return "not-compatible";
+            };
+            
+            const getCompatibilityMessage = (component, compatibility) => {
+                if (compatibility >= 1) {
+                    return `جهازك يتفوق على المتطلبات الموصى بها (${Math.round(compatibility * 100)}%)`;
+                }
+                if (compatibility >= 0.7) {
+                    return `جهازك يتوافق جزئياً مع المتطلبات الموصى بها (${Math.round(compatibility * 100)}%)`;
+                }
+                if (compatibility >= 0.5) {
+                    return `جهازك بالكاد يتوافق مع المتطلبات الدنيا (${Math.round(compatibility * 100)}%)`;
+                }
+                return `جهازك لا يتوافق مع المتطلبات الدنيا (${Math.round(compatibility * 100)}%)`;
+            };
+            
+            // إعداد نتائج التحليل
+            const results = [
+                {
+                    title: "المعالج",
+                    status: getCompatibilityStatus(cpuCompatibility),
+                    message: getCompatibilityMessage("المعالج", cpuCompatibility),
+                    compatibility: cpuCompatibility
+                },
+                {
+                    title: "كرت الشاشة",
+                    status: getCompatibilityStatus(gpuCompatibility),
+                    message: getCompatibilityMessage("كرت الشاشة", gpuCompatibility),
+                    compatibility: gpuCompatibility
+                },
+                {
+                    title: "الذاكرة العشوائية",
+                    status: getCompatibilityStatus(ramCompatibility),
+                    message: getCompatibilityMessage("الذاكرة", ramCompatibility),
+                    compatibility: ramCompatibility
+                }
+            ];
+            
+            // حساب التوافق العام
+            const overallCompatibility = (cpuCompatibility * 0.4 + gpuCompatibility * 0.4 + ramCompatibility * 0.2);
+            const overallStatus = getCompatibilityStatus(overallCompatibility);
+            
+            // عرض النتائج
+            const resultsContainer = document.getElementById('compatibility-results');
+            resultsContainer.innerHTML = `
+                <h3>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    نتائج التحليل
+                </h3>
+                <div class="compatibility-item ${overallStatus}" style="margin-bottom: 1.5rem;">
+                    <div class="compatibility-icon">${
+                        overallStatus === "compatible" ? "✓" : 
+                        overallStatus === "not-compatible" ? "✗" : "⚠"
+                    }</div>
+                    <div>
+                        <h4>التوافق العام: ${Math.round(overallCompatibility * 100)}%</h4>
+                        <p>${getCompatibilityMessage("النظام", overallCompatibility)}</p>
+                    </div>
+                </div>
+            `;
+            
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = `compatibility-item ${result.status}`;
+                item.innerHTML = `
+                    <div class="compatibility-icon">${
+                        result.status === "compatible" ? "✓" : 
+                        result.status === "not-compatible" ? "✗" : "⚠"
+                    }</div>
+                    <div>
+                        <h4>${result.title} (${Math.round(result.compatibility * 100)}%)</h4>
+                        <p>${result.message}</p>
+                    </div>
+                `;
+                resultsContainer.appendChild(item);
+            });
+            
+            resultsContainer.classList.add('active');
+            
+            // إعادة عرض الألعاب لتحديث حالة التوافق
+            filterGames();
+        }
+
+        // عرض اقتراحات البحث
+        function showSearchSuggestions(query) {
+            const suggestionsContainer = document.getElementById('search-suggestions');
+            suggestionsContainer.innerHTML = '';
+            
+            if (!query) {
+                suggestionsContainer.classList.remove('active');
+                return;
+            }
+            
+            // البحث في الألعاب
+            const gameResults = games.filter(game => 
+                game.title.toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 3);
+            
+            // البحث في قطع الهاردوير
+            const hardwareResults = [
+                ...hardwareSuggestions.cpu.filter(item => 
+                    item.toLowerCase().includes(query.toLowerCase())
+                ),
+                ...hardwareSuggestions.gpu.filter(item => 
+                    item.toLowerCase().includes(query.toLowerCase())
+                )
+            ].slice(0, 3);
+            
+            if (gameResults.length === 0 && hardwareResults.length === 0) {
+                suggestionsContainer.classList.remove('active');
+                return;
+            }
+            
+            if (gameResults.length > 0) {
+                const groupTitle = document.createElement('div');
+                groupTitle.className = 'suggestion-item';
+                groupTitle.style.fontWeight = 'bold';
+                groupTitle.textContent = 'الألعاب';
+                suggestionsContainer.appendChild(groupTitle);
+                
+                gameResults.forEach(game => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.textContent = game.title;
+                    item.addEventListener('click', () => {
+                        showGameDetails(game);
+                        suggestionsContainer.classList.remove('active');
+                        document.getElementById('search').value = '';
+                    });
+                    suggestionsContainer.appendChild(item);
+                });
+            }
+            
+            if (hardwareResults.length > 0) {
+                const groupTitle = document.createElement('div');
+                groupTitle.className = 'suggestion-item';
+                groupTitle.style.fontWeight = 'bold';
+                groupTitle.textContent = 'قطع الهاردوير';
+                suggestionsContainer.appendChild(groupTitle);
+                
+                hardwareResults.forEach(item => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'suggestion-item';
+                    suggestion.textContent = item;
+                    suggestion.addEventListener('click', () => {
+                        if (item.includes('Intel') || item.includes('AMD') || item.includes('Ryzen')) {
+                            document.getElementById('user-cpu').value = item;
+                        } else {
+                            document.getElementById('user-gpu').value = item;
+                        }
+                        suggestionsContainer.classList.remove('active');
+                        document.getElementById('search').value = '';
+                    });
+                    suggestionsContainer.appendChild(suggestion);
+                });
+            }
+            
+            suggestionsContainer.classList.add('active');
+        }
+
+        // عرض اقتراحات الهاردوير
+        function showHardwareSuggestions(type, query) {
+            const suggestionsContainer = document.getElementById(`${type}-suggestions`);
+            suggestionsContainer.innerHTML = '';
+            
+            if (!query) {
+                suggestionsContainer.classList.remove('active');
+                return;
+            }
+            
+            const results = hardwareSuggestions[type].filter(item => 
+                item.toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 5);
+            
+            if (results.length === 0) {
+                suggestionsContainer.classList.remove('active');
+                return;
+            }
+            
+            results.forEach(item => {
+                const option = document.createElement('div');
+                option.className = 'hardware-option';
+                option.textContent = item;
+                option.addEventListener('click', () => {
+                    document.getElementById(`user-${type}`).value = item;
+                    suggestionsContainer.classList.remove('active');
+                });
+                suggestionsContainer.appendChild(option);
+            });
+            
+            suggestionsContainer.classList.add('active');
+        }
+
+        // التحميل المتدرج عند التمرير
+        function handleScroll() {
+            const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+            const gamesContainer = document.getElementById('games-container');
+            const filteredGames = getFilteredGames();
+            
+            if (scrollTop + clientHeight >= scrollHeight - 100 && 
+                !isLoading && 
+                gamesContainer.children.length < filteredGames.length) {
+                isLoading = true;
+                currentPage++;
+                displayGames(filteredGames);
+            }
+        }
+
+        function getFilteredGames() {
+            let filteredGames = games;
+            
+            if (activeFilters.type !== "all") {
+                filteredGames = filteredGames.filter(game => game.type === activeFilters.type);
+            }
+            
+            if (activeFilters.level !== "all") {
+                filteredGames = filteredGames.filter(game => game.level === activeFilters.level);
+            }
+            
+            return filteredGames;
+        }
+
+        // البحث عن الألعاب
+        document.getElementById('search').addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            showSearchSuggestions(query);
+        });
+
+        // إغلاق اقتراحات البحث عند النقر خارجها
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                document.getElementById('search-suggestions').classList.remove('active');
+            }
+        });
+
+        // إدارة قائمة التصفية
+        document.getElementById('filter-menu-btn').addEventListener('click', () => {
+            document.getElementById('filter-menu').classList.add('active');
+        });
+
+        document.getElementById('close-filter-menu').addEventListener('click', () => {
+            document.getElementById('filter-menu').classList.remove('active');
+        });
+
+        // تطبيق التصفية
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                const filterType = option.dataset.filter;
+                const filterValue = option.dataset.value;
+                
+                // تجاهل النقر على عناصر الـ checkbox مباشرة
+                if (e.target.tagName === 'INPUT') return;
+                
+                // إذا كانت فلترة متعددة الخيارات (checkbox)
+                if (option.classList.contains('multi-select')) {
+                    const checkbox = option.querySelector('input');
+                    checkbox.checked = !checkbox.checked;
+                    
+                    // تحديث الفلاتر النشطة
+                    if (filterType === 'compatible') {
+                        const fullChecked = document.querySelector('[data-value="full"] input').checked;
+                        const partialChecked = document.querySelector('[data-value="partial"] input').checked;
+                        
+                        if (!fullChecked && !partialChecked) {
+                            document.querySelector('[data-value="all"] input').checked = true;
+                            activeFilters.compatible = "all";
+                        } else {
+                            document.querySelector('[data-value="all"] input').checked = false;
+                            activeFilters.compatible = "";
+                            if (fullChecked) activeFilters.compatible += "full,";
+                            if (partialChecked) activeFilters.compatible += "partial";
+                        }
+                    }
+                } 
+                // إذا كانت فلترة عادية (radio)
+                else {
+                    // إزالة التنشيط من جميع خيارات هذا النوع
+                    document.querySelectorAll(`.filter-option[data-filter="${filterType}"]`).forEach(opt => {
+                        opt.classList.remove('active');
+                    });
+                    
+                    // تنشيط الخيار المحدد
+                    option.classList.add('active');
+                    
+                    // تحديث الفلتر النشط
+                    activeFilters[filterType] = filterValue;
+                }
+                
+                // تطبيق التصفية
+                filterGames();
+            });
+        });
+
+        // إغلاق تفاصيل اللعبة
+        document.getElementById('close-details').addEventListener('click', closeGameDetails);
+
+        // تحقق من التوافق
+        document.getElementById('check-btn').addEventListener('click', checkCompatibility);
+
+        // اقتراحات الهاردوير عند الكتابة
+        document.getElementById('user-cpu').addEventListener('input', (e) => {
+            showHardwareSuggestions('cpu', e.target.value);
+        });
+
+        document.getElementById('user-gpu').addEventListener('input', (e) => {
+            showHardwareSuggestions('gpu', e.target.value);
+        });
+
+        // إغلاق اقتراحات الهاردوير عند النقر خارجها
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.hardware-suggestions')) {
+                document.getElementById('cpu-suggestions').classList.remove('active');
+                document.getElementById('gpu-suggestions').classList.remove('active');
+            }
+        });
+
+        // التحميل المتدرج عند التمرير
+        window.addEventListener('scroll', handleScroll);
+
+        // عرض الألعاب عند تحميل الصفحة
+        window.addEventListener('DOMContentLoaded', () => {
+            displayGames(games);
+        });
+    </script>
+</body>
+</html>
